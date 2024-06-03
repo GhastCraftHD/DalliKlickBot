@@ -7,6 +7,8 @@ token = "your-bot-token"
 guild_id = "your-server-id"
 
 [database]
+host = ""
+port = ""
 user = ""
 pass = ""
 namespace = ""
