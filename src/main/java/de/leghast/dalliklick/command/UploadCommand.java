@@ -7,6 +7,7 @@ public class UploadCommand {
 
     public UploadCommand(SlashCommandInteractionEvent e) {
         
+
         for (OptionMapping option : e.getOptions()) {
             e.getHook().sendMessage(
                     String.format("%s: %s", option.getName(), option.getAsString())
@@ -14,4 +15,5 @@ public class UploadCommand {
         }
 
     }
+
 }
