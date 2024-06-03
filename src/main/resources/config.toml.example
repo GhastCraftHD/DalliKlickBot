@@ -1,0 +1,13 @@
+#Dalli Klick configuration file
+
+[bot]
+token = "your-bot-token"
+
+[specification]
+guild_id = "your-server-id"
+
+[database]
+user = ""
+pass = ""
+namespace = ""
+database = ""

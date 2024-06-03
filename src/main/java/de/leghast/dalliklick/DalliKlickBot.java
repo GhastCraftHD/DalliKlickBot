@@ -1,8 +1,9 @@
 package de.leghast.dalliklick;
 
+import com.moandjiezana.toml.Toml;
 import de.leghast.dalliklick.handler.ExitHandler;
+import de.leghast.dalliklick.listener.CommandListener;
 import de.leghast.dalliklick.listener.ReadyListener;
-import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -16,6 +17,8 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class DalliKlickBot {
@@ -23,17 +26,17 @@ public class DalliKlickBot {
     public static DalliKlickBot INSTANCE;
     public static final ExitHandler EXIT = new ExitHandler();
 
-    private final Dotenv config;
+    private Toml toml;
     private JDA jda;
     private Guild guild;
     private static final Logger LOGGER = LoggerFactory.getLogger(DalliKlickBot.class);
 
-    
     public DalliKlickBot() {
-        this.config = Dotenv.configure().ignoreIfMalformed().load();
-
         try {
-            this.jda = JDABuilder.createDefault(config.get("TOKEN"))
+            URL resource = DalliKlickBot.class.getClassLoader().getResource("config.toml");
+            this.toml = new Toml().read(Paths.get(resource.toURI()).toFile());
+
+            this.jda = JDABuilder.createDefault(toml.getString("bot.token"))
                     .setStatus(OnlineStatus.ONLINE)
                     .setActivity(Activity.customStatus("Schreibt die 12. Teambeschwerde"))
                     .enableIntents(
@@ -54,7 +57,8 @@ public class DalliKlickBot {
 
     private void registerListeners(){
         List<ListenerAdapter> listenerAdapters = List.of(
-            new ReadyListener()
+            new ReadyListener(),
+            new CommandListener()
         );
 
         for (ListenerAdapter adapter : listenerAdapters) {
@@ -66,8 +70,8 @@ public class DalliKlickBot {
         return jda;
     }
 
-    public Dotenv config() {
-        return config;
+    public Toml toml(){
+        return toml;
     }
 
     public Guild guild() {

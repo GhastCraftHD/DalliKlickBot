@@ -4,6 +4,7 @@ import de.leghast.dalliklick.DalliKlickBot;
 import de.leghast.dalliklick.exception.GuildNotFoundException;
 import de.leghast.dalliklick.game.Difficulty;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -32,7 +33,7 @@ public class ReadyListener extends ListenerAdapter {
     }
 
     private void setupGuild(ReadyEvent event) throws GuildNotFoundException {
-        String guildID = DalliKlickBot.INSTANCE.config().get("GUILD");
+        String guildID = DalliKlickBot.INSTANCE.toml().getString("specification.guild_id");
         Guild guild = event.getJDA().getGuildById(guildID);
 
         if(guild == null)
@@ -50,7 +51,7 @@ public class ReadyListener extends ListenerAdapter {
         Guild guild = DalliKlickBot.INSTANCE.guild();
 
         List<Command.Choice> uploadChoices = Arrays.stream(Difficulty.values())
-                .map(diff -> new Command.Choice(diff.name(), diff.name().toLowerCase()))
+                .map(diff -> new Command.Choice(diff.prettyName(), diff.prettyName()))
                 .toList();
 
         List<SlashCommandData> commandData = List.of(
@@ -64,6 +65,7 @@ public class ReadyListener extends ListenerAdapter {
         );
 
         guild.updateCommands().addCommands(commandData).queue();
+        commandData.forEach(data -> LOGGER.info(String.format("Registered command \"%s\" on main guild", data.getName())));
     }
 
 }
