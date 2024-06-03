@@ -1,11 +1,13 @@
 package de.leghast.dalliklick.listener;
 
 import de.leghast.dalliklick.DalliKlickBot;
+import de.leghast.dalliklick.database.Database;
 import de.leghast.dalliklick.exception.GuildNotFoundException;
 import de.leghast.dalliklick.holder.BotCommands;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +16,18 @@ public class ReadyListener extends ListenerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadyListener.class);
 
     @Override
-    public void onReady(ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
+
+        LOGGER.info("Initialising DalliKlickBot components");
+
+        initialiseClasses();
+
         try {
             setupGuild(event);
         } catch (GuildNotFoundException e) {
             DalliKlickBot.EXIT.exit(e);
         }
+
         registerCommands();
     }
 
@@ -34,8 +42,13 @@ public class ReadyListener extends ListenerAdapter {
             ));
 
         DalliKlickBot.INSTANCE.guild(guild);
-        LOGGER.info(String.format("Set %s as the main guild for this bot instance", guild.getName()));
+        LOGGER.info(String.format("Set \"%s\" (%s) as the main guild for this bot instance", guild.getName(), guild.getId()));
 
+    }
+
+    private void initialiseClasses(){
+        DalliKlickBot bot = DalliKlickBot.INSTANCE;
+        bot.database(new Database());
     }
 
     private void registerCommands(){

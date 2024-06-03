@@ -17,8 +17,26 @@ public class FileHandler {
 
     private final String homeDir = System.getProperty("user.home");
     Path appDir = Paths.get(homeDir, ".dalliklick");
+    Path imageDir = appDir.resolve("images");
 
     public FileHandler(){
+        setupAppDir();
+
+        setupImageDir();
+    }
+
+    private void setupImageDir() {
+        if(!Files.exists(imageDir)){
+            try {
+                Files.createDirectories(imageDir);
+            } catch (IOException e) {
+                LOGGER.error("Unable to access image directory");
+                DalliKlickBot.EXIT.exit(e, 2);
+            }
+        }
+    }
+
+    private void setupAppDir() {
         if(!Files.exists(appDir)){
             try {
                 Files.createDirectories(appDir);
@@ -31,8 +49,13 @@ public class FileHandler {
 
     public Optional<String> saveImage(File imageFile){
         try{
-            Path destinationPath = appDir.resolve(imageFile.getName());
-            Files.copy(imageFile.toPath(), destinationPath);
+            Path destinationPath = imageDir.resolve(imageFile.getName());
+            Files.move(imageFile.toPath(), destinationPath);
+            LOGGER.info(String.format(
+                    "Saved image %s to %s",
+                    imageFile.getName(),
+                    destinationPath
+            ));
             return Optional.of(destinationPath.toString());
         }catch(IOException e){
             LOGGER.error("Unable to save image");

@@ -9,8 +9,6 @@ public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
-
         String command = event.getName().toLowerCase();
 
         switch(command){

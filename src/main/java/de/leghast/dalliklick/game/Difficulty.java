@@ -1,5 +1,7 @@
 package de.leghast.dalliklick.game;
 
+import java.util.Optional;
+
 public enum Difficulty {
 
     VERY_EASY("Very Easy"),
@@ -16,6 +18,13 @@ public enum Difficulty {
 
     public String prettyName(){
         return this.prettyName;
+    }
+
+    public static Optional<Difficulty> getByPrettyName(String prettyName){
+        for (Difficulty difficulty : Difficulty.values()) {
+            if(difficulty.prettyName.equals(prettyName)) return Optional.of(difficulty);
+        }
+        return Optional.empty();
     }
 
 }

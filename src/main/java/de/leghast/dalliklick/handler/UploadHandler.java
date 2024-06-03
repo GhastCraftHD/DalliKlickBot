@@ -16,20 +16,21 @@ public class UploadHandler {
     public State upload(DalliKlick dalliKlick){
         FileHandler fileHandler = DalliKlickBot.HANDLERS.fileHandler();
         Optional<String> optionalPath = fileHandler.saveImage(dalliKlick.imageFile());
+
         if(optionalPath.isEmpty()) return State.ERROR;
-        upload(new DatabaseDalliKlick(
+
+        return upload(new DatabaseDalliKlick(
                 dalliKlick.subject(),
-                optionalPath.orElseThrow(),
+                dalliKlick.imageFile().getPath(),
                 dalliKlick.difficulty()
         ));
-        return State.SUCCESS;
     }
 
-    private void upload(DatabaseDalliKlick dalliKlick){
-        DalliKlickBot.INSTANCE.database()
-                .executeQuery(driver -> driver.create("dalli_klick", dalliKlick));
-        LOGGER.info("Uploaded Dalli Klick to database");
-        LOGGER.info(dalliKlick.toString());
+    private State upload(DatabaseDalliKlick dalliKlick){
+
+        DatabaseDalliKlick executed = DalliKlickBot.INSTANCE.database().executeQuery(driver -> driver.create("dalli_klick", dalliKlick));
+
+        return (executed != null) ? State.SUCCESS : State.ERROR;
     }
 
 }

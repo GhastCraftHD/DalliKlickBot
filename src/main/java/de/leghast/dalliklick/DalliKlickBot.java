@@ -5,6 +5,7 @@ import de.leghast.dalliklick.database.Database;
 import de.leghast.dalliklick.handler.ExitHandler;
 import de.leghast.dalliklick.holder.HandlerHolder;
 import de.leghast.dalliklick.listener.CommandListener;
+import de.leghast.dalliklick.listener.ContextListener;
 import de.leghast.dalliklick.listener.ReadyListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -34,9 +35,11 @@ public class DalliKlickBot {
     private Toml toml;
     private JDA jda;
     private Guild guild;
-    private final Database database;
+    private Database database;
 
     public DalliKlickBot() {
+        LOGGER.info("Starting up DalliKlick Bot");
+
         try {
             setupConfig();
             setupJDA();
@@ -44,14 +47,13 @@ public class DalliKlickBot {
             EXIT.exit(e, 1);
         }
 
-        this.database = new Database();
-
         registerListeners();
     }
 
     private void setupConfig() throws URISyntaxException {
         URL resource = DalliKlickBot.class.getClassLoader().getResource("config.toml");
         this.toml = new Toml().read(Paths.get(resource.toURI()).toFile());
+        LOGGER.info("Successfully loaded config.toml");
     }
 
     private void setupJDA() throws Exception{
@@ -67,16 +69,19 @@ public class DalliKlickBot {
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .enableCache(CacheFlag.ONLINE_STATUS)
                 .build();
+        LOGGER.info("Successfully connected Bot to Discord API");
     }
 
     private void registerListeners(){
         List<ListenerAdapter> listenerAdapters = List.of(
             new ReadyListener(),
-            new CommandListener()
+            new CommandListener(),
+            new ContextListener()
         );
 
         for (ListenerAdapter adapter : listenerAdapters) {
             jda.addEventListener(adapter);
+            LOGGER.info(String.format("Registered %s", adapter.getClass().getName()));
         }
     }
 
@@ -98,6 +103,10 @@ public class DalliKlickBot {
 
     public Database database() {
         return database;
+    }
+
+    public void database(Database database){
+        this.database = database;
     }
 
     public static void main(String[] args) {
