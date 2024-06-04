@@ -1,36 +1,40 @@
 package de.leghast.dalliklick.handler;
 
 import de.leghast.dalliklick.DalliKlickBot;
+import de.leghast.dalliklick.exception.ImageSaveException;
+import de.leghast.dalliklick.exception.UploadException;
 import de.leghast.dalliklick.holder.DalliKlick;
 import de.leghast.dalliklick.holder.DatabaseDalliKlick;
-import de.leghast.dalliklick.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import java.io.IOException;
 
 public class UploadHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadHandler.class);
 
-    public State upload(DalliKlick dalliKlick){
+    public void upload(DalliKlick dalliKlick) throws ImageSaveException, UploadException {
         FileHandler fileHandler = DalliKlickBot.HANDLERS.fileHandler();
-        Optional<String> optionalPath = fileHandler.saveImage(dalliKlick.imageFile());
+        try {
+            fileHandler.saveImage(dalliKlick.imageFile());
+        } catch (IOException e) {
+            LOGGER.error("Unable to save image", e);
+            throw new ImageSaveException("Unable to save image", e);
+        }
 
-        if(optionalPath.isEmpty()) return State.ERROR;
-
-        return upload(new DatabaseDalliKlick(
-                dalliKlick.subject(),
-                dalliKlick.imageFile().getPath(),
-                dalliKlick.difficulty()
-        ));
+        upload(dalliKlick.asDatabaseDalliKlick());
     }
 
-    private State upload(DatabaseDalliKlick dalliKlick){
-
+    private void upload(DatabaseDalliKlick dalliKlick) throws UploadException {
+        LOGGER.info(String.format("Uploading %s", dalliKlick.toString()));
         DatabaseDalliKlick executed = DalliKlickBot.INSTANCE.database().executeQuery(driver -> driver.create("dalli_klick", dalliKlick));
-
-        return (executed != null) ? State.SUCCESS : State.ERROR;
+        if(executed == null){
+            LOGGER.error("Unable to upload DalliKlick");
+            throw new UploadException("Unable to upload DalliKlick");
+        }
+        LOGGER.info("Successfully uploaded DalliKlick to database");
+        LOGGER.info(dalliKlick.toString());
     }
 
 }

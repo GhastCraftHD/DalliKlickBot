@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 public class FileHandler {
 
@@ -47,20 +46,14 @@ public class FileHandler {
         }
     }
 
-    public Optional<String> saveImage(File imageFile){
-        try{
-            Path destinationPath = imageDir.resolve(imageFile.getName());
-            Files.move(imageFile.toPath(), destinationPath);
-            LOGGER.info(String.format(
-                    "Saved image %s to %s",
-                    imageFile.getName(),
-                    destinationPath
-            ));
-            return Optional.of(destinationPath.toString());
-        }catch(IOException e){
-            LOGGER.error("Unable to save image");
-            return Optional.empty();
-        }
+    public void saveImage(File imageFile) throws IOException{
+        Path destinationPath = imageDir.resolve(imageFile.getName());
+        Files.move(imageFile.toPath(), destinationPath);
+        LOGGER.info(String.format(
+                "Saved image %s to %s",
+                imageFile.getName(),
+                destinationPath
+        ));
     }
 
 }

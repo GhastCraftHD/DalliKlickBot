@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -73,16 +72,16 @@ public class DalliKlickBot {
     }
 
     private void registerListeners(){
-        List<ListenerAdapter> listenerAdapters = List.of(
+        List.of(
             new ReadyListener(),
             new CommandListener(),
             new ContextListener()
+        ).forEach(
+                adapter -> {
+                    jda.addEventListener(adapter);
+                    LOGGER.info(String.format("Registered %s", adapter.getClass().getName()));
+                }
         );
-
-        for (ListenerAdapter adapter : listenerAdapters) {
-            jda.addEventListener(adapter);
-            LOGGER.info(String.format("Registered %s", adapter.getClass().getName()));
-        }
     }
 
     public JDA jda(){

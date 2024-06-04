@@ -1,16 +1,12 @@
 package de.leghast.dalliklick.exception;
 
-public class GuildNotFoundException extends DalliException{
+public class GuildNotFoundException extends Exception{
 
     public GuildNotFoundException() {
     }
 
     public GuildNotFoundException(String message) {
         super(message);
-    }
-
-    public GuildNotFoundException(String message, int status) {
-        super(message, status);
     }
 
     public GuildNotFoundException(String message, Throwable cause) {
@@ -21,7 +17,5 @@ public class GuildNotFoundException extends DalliException{
         super(cause);
     }
 
-    public GuildNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+
 }

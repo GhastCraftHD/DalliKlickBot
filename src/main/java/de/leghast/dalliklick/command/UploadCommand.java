@@ -30,45 +30,41 @@ public class UploadCommand {
 
         if (checkImage(event)) return;
 
-        handle(event, difficulty);
-
-    }
-
-    private static void handle(SlashCommandInteractionEvent event, Difficulty difficulty) {
         CompletableFuture<Path> future = event.getOption("image")
                 .getAsAttachment()
                 .getProxy().downloadToPath();
 
         future.thenAccept(
-                path -> handle(event, difficulty, path)
+                path -> handleUpload(event, difficulty, path)
         );
+
     }
 
-    private static void handle(SlashCommandInteractionEvent event, Difficulty difficulty, Path path) {
-        DalliKlickBot.HANDLERS.uploadHandler().upload(
-                new DalliKlick(
-                        event.getOption("subject").getAsString(),
-                        path.toFile(),
-                        difficulty
-                )
-        ).ifSuccessfulOrElse(
-                () -> respondToSuccess(event),
-                () -> respondToFailure(event)
-        );
+    private static void handleUpload(SlashCommandInteractionEvent event, Difficulty difficulty, Path path) {
+        try {
+            DalliKlickBot.HANDLERS.uploadHandler().upload(
+                    new DalliKlick(
+                            event.getOption("subject").getAsString(),
+                            path.toFile(),
+                            difficulty
+                    )
+            );
+            respondToSuccess(event);
+        } catch (Exception e) {
+            respondToFailure(event);
+        }
     }
 
     private static void respondToFailure(SlashCommandInteractionEvent event) {
         event.getHook()
                 .sendMessage("Dein Dalli klick konnte nicht hochgeladen werden")
                 .queue();
-        LOGGER.error("Could not upload Dalli Klick to database");
     }
 
     private static void respondToSuccess(SlashCommandInteractionEvent event) {
         event.getHook()
                 .setEphemeral(false)
                 .sendMessage("Dein Dalli Klick wurde hochgeladen").queue();
-        LOGGER.info("Successfully upladed new Dalli Klick to database");
 
         event.getChannel().asTextChannel().sendMessage(String.format(
                 "%s uploaded a new Dalli Klick (%s)",
