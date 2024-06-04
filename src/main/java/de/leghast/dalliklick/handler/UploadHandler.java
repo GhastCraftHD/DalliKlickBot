@@ -29,10 +29,12 @@ public class UploadHandler {
     private void upload(DatabaseDalliKlick dalliKlick) throws UploadException {
         LOGGER.info(String.format("Uploading %s", dalliKlick.toString()));
         DatabaseDalliKlick executed = DalliKlickBot.INSTANCE.database().executeQuery(driver -> driver.create("dalli_klick", dalliKlick));
+
         if(executed == null){
             LOGGER.error("An error occured while uploading DalliKlick to database");
             throw new UploadException("An error occured while uploading DalliKlick to database");
         }
+
         LOGGER.info("Successfully uploaded DalliKlick to database");
         LOGGER.info(dalliKlick.toString());
     }

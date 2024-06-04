@@ -2,6 +2,7 @@ package de.leghast.dalliklick.database;
 
 import com.moandjiezana.toml.Toml;
 import com.surrealdb.connection.SurrealWebSocketConnection;
+import com.surrealdb.driver.AsyncSurrealDriver;
 import com.surrealdb.driver.SyncSurrealDriver;
 import de.leghast.dalliklick.DalliKlickBot;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ public class Database {
 
     private SurrealWebSocketConnection connection;
     private SyncSurrealDriver driver;
+    private AsyncSurrealDriver asyncDriver;
     private final Toml toml;
 
     private final DatabaseCredentials credentials;
@@ -24,7 +26,7 @@ public class Database {
         this.credentials = new DatabaseCredentials();
     }
 
-    private void connect(){
+    private void connect(boolean async){
         disconnect();
         LOGGER.info("Connecting to database...");
 
@@ -41,10 +43,23 @@ public class Database {
                 toml.getString("database.port")
         ));
 
+        if(async){
+            connectAsyncDriver();
+        }else {
+            connectSyncDriver();
+        }
+    }
+
+    private void connectSyncDriver() {
         this.driver = new SyncSurrealDriver(connection);
         driver.signIn(credentials.user(), credentials.pass());
         driver.use(credentials.namespace(), credentials.database());
+    }
 
+    private void connectAsyncDriver() {
+        this.asyncDriver = new AsyncSurrealDriver(connection);
+        asyncDriver.signIn(credentials.user(), credentials.pass());
+        asyncDriver.use(credentials.namespace(), credentials.database());
     }
 
     private boolean isConnected(){
@@ -59,8 +74,15 @@ public class Database {
     }
 
     public <T> T executeQuery(DriverQuery<T> query){
-        connect();
+        connect(false);
         T result = query.execute(driver);
+        disconnect();
+        return result;
+    }
+
+    public <T> T executeQueryAsync(AsyncDriverQuery<T> query){
+        connect(true);
+        T result = query.execute(asyncDriver);
         disconnect();
         return result;
     }
