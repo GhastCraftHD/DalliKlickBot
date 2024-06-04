@@ -26,7 +26,8 @@ public class BotCommands {
                                     .addChoices(uploadChoices)
                     )
                     .setDefaultPermissions(DefaultMemberPermissions.DISABLED),
-            Commands.message("Dalli Klick bearbeiten")
+            Commands.message("Dalli Klick bearbeiten"),
+            Commands.slash("dalliklick", "Eine Erklärung, was Dalli Klick ist und wie man mitspielen kann")
     );
 
 }

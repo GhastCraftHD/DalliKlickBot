@@ -58,7 +58,6 @@ public class ReadyListener extends ListenerAdapter {
     private void registerCommands(){
         Guild guild = DalliKlickBot.INSTANCE.guild();
 
-
         guild.updateCommands().addCommands(BotCommands.COMMAND_DATA).queue();
         BotCommands.COMMAND_DATA.forEach(
                 data -> LOGGER.info(String.format("Registered command \"%s\" on main guild", data.getName())));

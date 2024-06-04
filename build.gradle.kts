@@ -20,6 +20,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("com.moandjiezana.toml:toml4j:0.7.2")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.guava:guava:32.0.0-android")
     implementation("com.surrealdb:surrealdb-driver:0.1.0")
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
     implementation("com.intuit.fuzzymatcher:fuzzy-matcher:1.2.1")
