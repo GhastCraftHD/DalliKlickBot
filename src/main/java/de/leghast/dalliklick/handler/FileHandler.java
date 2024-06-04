@@ -1,6 +1,6 @@
 package de.leghast.dalliklick.handler;
 
-import de.leghast.dalliklick.DalliKlickBot;
+import de.leghast.dalliklick.exception.DirectoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,9 @@ public class FileHandler {
                 Files.createDirectories(imageDir);
             } catch (IOException e) {
                 LOGGER.error("Unable to access image directory");
-                DalliKlickBot.EXIT.exit(e, 2);
+                new ExceptionHandler()
+                        .handleCriticalException(
+                                new DirectoryException("Unable to access image directory in application folder"));
             }
         }
     }
@@ -41,19 +43,21 @@ public class FileHandler {
                 Files.createDirectories(appDir);
             } catch (IOException e) {
                 LOGGER.error("Unable to access application directory");
-                DalliKlickBot.EXIT.exit(e, 2);
+                new ExceptionHandler()
+                        .handleCriticalException(new DirectoryException("Unable to access application directory"));
             }
         }
     }
 
-    public void saveImage(File imageFile) throws IOException{
+    public File saveImage(File imageFile) throws IOException{
         Path destinationPath = imageDir.resolve(imageFile.getName());
-        Files.move(imageFile.toPath(), destinationPath);
+        File moved = Files.move(imageFile.toPath(), destinationPath).toFile();
         LOGGER.info(String.format(
                 "Saved image %s to %s",
                 imageFile.getName(),
-                destinationPath
+                moved.getPath()
         ));
+        return moved;
     }
 
 }

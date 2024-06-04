@@ -5,15 +5,18 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
+
 public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        String command = event.getName().toLowerCase();
+        CompletableFuture.runAsync(() -> {
+            String command = event.getName().toLowerCase();
 
-        switch(command){
-            case "upload" -> new UploadCommand(event);
-        }
-
+            switch(command){
+                case "upload" -> new UploadCommand(event);
+            }
+        });
     }
 }

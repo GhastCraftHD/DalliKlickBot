@@ -17,7 +17,7 @@ public class UploadHandler {
     public void upload(DalliKlick dalliKlick) throws ImageSaveException, UploadException {
         FileHandler fileHandler = DalliKlickBot.HANDLERS.fileHandler();
         try {
-            fileHandler.saveImage(dalliKlick.imageFile());
+            dalliKlick.imageFile(fileHandler.saveImage(dalliKlick.imageFile()));
         } catch (IOException e) {
             LOGGER.error("Unable to save image to application directory", e);
             throw new ImageSaveException("Unable to save image to application directory", e);

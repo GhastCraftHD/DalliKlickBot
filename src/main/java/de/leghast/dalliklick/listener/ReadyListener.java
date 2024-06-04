@@ -3,6 +3,7 @@ package de.leghast.dalliklick.listener;
 import de.leghast.dalliklick.DalliKlickBot;
 import de.leghast.dalliklick.database.Database;
 import de.leghast.dalliklick.exception.GuildNotFoundException;
+import de.leghast.dalliklick.handler.ExceptionHandler;
 import de.leghast.dalliklick.holder.BotCommands;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -25,7 +26,7 @@ public class ReadyListener extends ListenerAdapter {
         try {
             setupGuild(event);
         } catch (GuildNotFoundException e) {
-            DalliKlickBot.EXIT.exit(e);
+            new ExceptionHandler().handleCriticalException(e);
         }
 
         registerCommands();
@@ -35,11 +36,14 @@ public class ReadyListener extends ListenerAdapter {
         String guildID = DalliKlickBot.INSTANCE.toml().getString("specification.guild_id");
         Guild guild = event.getJDA().getGuildById(guildID);
 
-        if(guild == null)
+        if(guild == null){
+            LOGGER.error(String.format("Could not find guild with ID \"%s\"", guildID));
             throw new GuildNotFoundException(String.format(
                     "Could not find guild with ID \"%s\"",
                     guildID
             ));
+        }
+
 
         DalliKlickBot.INSTANCE.guild(guild);
         LOGGER.info(String.format("Set \"%s\" (%s) as the main guild for this bot instance", guild.getName(), guild.getId()));
