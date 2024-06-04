@@ -2,6 +2,7 @@
 
 [bot]
 token = "your-bot-token"
+status = ""
 
 [specification]
 guild_id = "your-server-id"

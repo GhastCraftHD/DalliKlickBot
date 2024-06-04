@@ -19,8 +19,8 @@ public class UploadHandler {
         try {
             fileHandler.saveImage(dalliKlick.imageFile());
         } catch (IOException e) {
-            LOGGER.error("Unable to save image", e);
-            throw new ImageSaveException("Unable to save image", e);
+            LOGGER.error("Unable to save image to application directory", e);
+            throw new ImageSaveException("Unable to save image to application directory", e);
         }
 
         upload(dalliKlick.asDatabaseDalliKlick());
@@ -30,8 +30,8 @@ public class UploadHandler {
         LOGGER.info(String.format("Uploading %s", dalliKlick.toString()));
         DatabaseDalliKlick executed = DalliKlickBot.INSTANCE.database().executeQuery(driver -> driver.create("dalli_klick", dalliKlick));
         if(executed == null){
-            LOGGER.error("Unable to upload DalliKlick");
-            throw new UploadException("Unable to upload DalliKlick");
+            LOGGER.error("An error occured while uploading DalliKlick to database");
+            throw new UploadException("An error occured while uploading DalliKlick to database");
         }
         LOGGER.info("Successfully uploaded DalliKlick to database");
         LOGGER.info(dalliKlick.toString());

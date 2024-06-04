@@ -13,7 +13,7 @@ public class DalliKlick {
     private Difficulty difficulty;
 
     public DalliKlick(String subject, File imageFile, Difficulty difficulty) {
-        this.id = RandomStringUtils.randomAlphanumeric(8);
+        this.id = RandomStringUtils.randomAlphanumeric(16);
         this.subject = subject;
         this.imageFile = imageFile;
         this.difficulty = difficulty;

@@ -2,7 +2,9 @@ package de.leghast.dalliklick;
 
 import com.moandjiezana.toml.Toml;
 import de.leghast.dalliklick.database.Database;
-import de.leghast.dalliklick.handler.ExitHandler;
+import de.leghast.dalliklick.exception.APIConnectionException;
+import de.leghast.dalliklick.exception.ConfigurationException;
+import de.leghast.dalliklick.handler.ExceptionHandler;
 import de.leghast.dalliklick.holder.HandlerHolder;
 import de.leghast.dalliklick.listener.CommandListener;
 import de.leghast.dalliklick.listener.ContextListener;
@@ -29,7 +31,6 @@ public class DalliKlickBot {
     public static DalliKlickBot INSTANCE;
     public static final HandlerHolder HANDLERS = new HandlerHolder();
     private static final Logger LOGGER = LoggerFactory.getLogger(DalliKlickBot.class);
-    public static final ExitHandler EXIT = new ExitHandler();
 
     private Toml toml;
     private JDA jda;
@@ -42,8 +43,12 @@ public class DalliKlickBot {
         try {
             setupConfig();
             setupJDA();
-        }catch (Exception e){
-            EXIT.exit(e, 1);
+        } catch (URISyntaxException e) {
+            new ExceptionHandler()
+                    .handleCriticalException(new ConfigurationException("Could not load config.toml", e));
+        } catch (Exception e) {
+            new ExceptionHandler()
+                    .handleCriticalException(new APIConnectionException("Could not connect to Discord API", e));
         }
 
         registerListeners();
@@ -51,6 +56,7 @@ public class DalliKlickBot {
 
     private void setupConfig() throws URISyntaxException {
         URL resource = DalliKlickBot.class.getClassLoader().getResource("config.toml");
+        assert resource != null;
         this.toml = new Toml().read(Paths.get(resource.toURI()).toFile());
         LOGGER.info("Successfully loaded config.toml");
     }
@@ -58,7 +64,7 @@ public class DalliKlickBot {
     private void setupJDA() throws Exception{
         this.jda = JDABuilder.createDefault(toml.getString("bot.token"))
                 .setStatus(OnlineStatus.ONLINE)
-                .setActivity(Activity.customStatus("Schreibt die 12. Teambeschwerde"))
+                .setActivity(Activity.customStatus(toml.getString("bot.status")))
                 .enableIntents(
                         GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.GUILD_MESSAGES,

@@ -1,6 +1,8 @@
 package de.leghast.dalliklick.command;
 
 import de.leghast.dalliklick.DalliKlickBot;
+import de.leghast.dalliklick.exception.ImageSaveException;
+import de.leghast.dalliklick.exception.UploadException;
 import de.leghast.dalliklick.game.Difficulty;
 import de.leghast.dalliklick.holder.DalliKlick;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -41,6 +43,7 @@ public class UploadCommand {
     }
 
     private static void handleUpload(SlashCommandInteractionEvent event, Difficulty difficulty, Path path) {
+
         try {
             DalliKlickBot.HANDLERS.uploadHandler().upload(
                     new DalliKlick(
@@ -50,9 +53,11 @@ public class UploadCommand {
                     )
             );
             respondToSuccess(event);
-        } catch (Exception e) {
+        } catch (ImageSaveException | UploadException e) {
             respondToFailure(event);
         }
+
+
     }
 
     private static void respondToFailure(SlashCommandInteractionEvent event) {
