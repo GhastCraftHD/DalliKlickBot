@@ -43,7 +43,7 @@ public class DalliKlickBot {
         try {
             setupConfig();
             setupJDA();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | NullPointerException e) {
             new ExceptionHandler()
                     .handleCriticalException(new ConfigurationException("Could not load config.toml", e));
         } catch (Exception e) {
@@ -56,7 +56,6 @@ public class DalliKlickBot {
 
     private void setupConfig() throws URISyntaxException {
         URL resource = DalliKlickBot.class.getClassLoader().getResource("config.toml");
-        assert resource != null;
         this.toml = new Toml().read(Paths.get(resource.toURI()).toFile());
         LOGGER.info("Successfully loaded config.toml");
     }
