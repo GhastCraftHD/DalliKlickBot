@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     application
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -36,7 +34,6 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"

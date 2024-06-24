@@ -1,24 +1,23 @@
 package de.leghast.dalliklick.command;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+
+import java.util.regex.Pattern;
 
 public class EditCommand {
 
+    private final Pattern dalliKlickId = Pattern.compile("dalli_klick:[A-Za-z0-9]{16}");
+
     public EditCommand(MessageContextInteractionEvent event) {
-        TextInput subject = TextInput.create("subject", "Lösung", TextInputStyle.SHORT)
-                .setPlaceholder("Lösung dieses Dalli Klicks")
-                .setRequiredRange(5, 75)
-                .setValue("Hamburg")
-                .build();
+        event.deferReply(true).queue();
 
-        Modal modal = Modal.create("edit", "Dalli Klick bearbeiten")
-                .addComponents(ActionRow.of(subject))
-                .build();
+        Message target = event.getInteraction().getTarget();
 
-        event.replyModal(modal).queue();
     }
+
+    public void responseNoDalliKlick(MessageContextInteractionEvent event){
+
+    }
+
 }

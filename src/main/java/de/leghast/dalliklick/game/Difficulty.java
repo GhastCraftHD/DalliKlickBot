@@ -4,20 +4,26 @@ import java.util.Optional;
 
 public enum Difficulty {
 
-    VERY_EASY("Very Easy"),
-    EASY("Easy"),
-    NORMAL("Normal"),
-    HARD("Hard"),
-    VERY_HARD("Very Hard");
+    VERY_EASY("Very Easy", "Sehr einfach"),
+    EASY("Easy", "Einfach"),
+    NORMAL("Normal", "Normal"),
+    HARD("Hard", "Schwer"),
+    VERY_HARD("Very Hard", "Sehr schwer");
 
-    String prettyName;
+    final String prettyName;
+    final String prettyGermanName;
 
-    Difficulty(String prettyName){
+    Difficulty(String prettyName, String prettyGermanName){
         this.prettyName = prettyName;
+        this.prettyGermanName = prettyGermanName;
     }
 
     public String prettyName(){
         return this.prettyName;
+    }
+
+    public String prettyGermanName(){
+        return this.prettyGermanName;
     }
 
     public static Optional<Difficulty> getByPrettyName(String prettyName){

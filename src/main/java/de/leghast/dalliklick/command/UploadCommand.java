@@ -5,10 +5,14 @@ import de.leghast.dalliklick.exception.ImageSaveException;
 import de.leghast.dalliklick.exception.UploadException;
 import de.leghast.dalliklick.game.Difficulty;
 import de.leghast.dalliklick.holder.DalliKlick;
+import de.leghast.dalliklick.holder.DatabaseDalliKlick;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -45,14 +49,14 @@ public class UploadCommand {
     private static void handleUpload(SlashCommandInteractionEvent event, Difficulty difficulty, Path path) {
 
         try {
-            DalliKlickBot.HANDLERS.uploadHandler().upload(
+            DatabaseDalliKlick uploaded = DalliKlickBot.HANDLERS.uploadHandler().upload(
                     new DalliKlick(
                             event.getOption("subject").getAsString(),
                             path.toFile(),
                             difficulty
                     )
             );
-            respondToSuccess(event);
+            respondToSuccess(event, uploaded);
         } catch (ImageSaveException | UploadException e) {
             respondToFailure(event);
         }
@@ -66,16 +70,21 @@ public class UploadCommand {
                 .queue();
     }
 
-    private static void respondToSuccess(SlashCommandInteractionEvent event) {
+    private static void respondToSuccess(SlashCommandInteractionEvent event, DatabaseDalliKlick uploaded) {
+        MessageEmbed embed = new EmbedBuilder()
+                .setTitle(String.format("%s hat ein neues Dalli Klick hochgeladen", event.getUser().getEffectiveName()))
+                .setDescription(String.format("Dalli Klick \"%s\" wurde hochgeladen", uploaded.subject()))
+                .setColor(new Color(0, 186, 71))
+                .addField("Schwierigkeit:", uploaded.difficulty().prettyGermanName(), true)
+                .setFooter(uploaded.id()).build();
+
         event.getHook()
                 .setEphemeral(false)
                 .sendMessage("Dein Dalli Klick wurde hochgeladen").queue();
 
-        event.getChannel().asTextChannel().sendMessage(String.format(
-                "%s uploaded a new Dalli Klick (%s)",
-                event.getMember().getAsMention(),
-                event.getOption("subject").getAsString()
-        )).queue();
+        event.getChannel().asTextChannel().sendMessageEmbeds(embed).queue();
+
+
     }
 
     private static boolean checkImage(SlashCommandInteractionEvent event) {
