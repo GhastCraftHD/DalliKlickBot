@@ -10,7 +10,7 @@ public enum Difficulty {
     HARD("Hard"),
     VERY_HARD("Very Hard");
 
-    String prettyName;
+    final String prettyName;
 
     Difficulty(String prettyName){
         this.prettyName = prettyName;
