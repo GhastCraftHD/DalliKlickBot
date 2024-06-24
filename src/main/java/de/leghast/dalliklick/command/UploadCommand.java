@@ -61,7 +61,6 @@ public class UploadCommand {
             respondToFailure(event);
         }
 
-
     }
 
     private static void respondToFailure(SlashCommandInteractionEvent event) {
