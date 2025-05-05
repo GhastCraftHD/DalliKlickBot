@@ -1,4 +1,5 @@
 mod ping;
+mod create;
 
 use serenity::all::CommandInteraction;
 use serenity::builder::CreateCommand;
