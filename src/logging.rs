@@ -1,11 +1,13 @@
+use chrono::Local;
 use std::fs::File;
 use std::io;
 use std::path::PathBuf;
-use chrono::Local;
 use tracing::info;
-use tracing_subscriber::fmt;
+use tracing_subscriber::filter::LevelFilter;
+
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{fmt, Layer};
 
 pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     //Generate timestamped log filename
@@ -39,14 +41,17 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with_target(true)
         .with_line_number(true)
         .with_file(true)
-        .with_ansi(true);
+        .with_ansi(true)
+        .with_filter(LevelFilter::DEBUG);
+        
     
     let file_layer = fmt::layer()
         .with_writer(move || File::options().append(true).open(&log_path).unwrap())
         .with_target(true)
         .with_line_number(true)
         .with_file(true)
-        .with_ansi(false);
+        .with_ansi(false)
+        .with_filter(LevelFilter::DEBUG);
     
     tracing_subscriber::registry()
         .with(stdout_layer)
