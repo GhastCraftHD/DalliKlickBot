@@ -18,7 +18,6 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     let _ = File::create(&log_path)?;
     
     //Create or update latest.log symlink or copy
-    
     #[cfg(unix)]
     {
         use std::os::unix::fs::symlink;

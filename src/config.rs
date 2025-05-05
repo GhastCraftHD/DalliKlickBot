@@ -1,6 +1,5 @@
 use std::path::Path;
 use serde::{Deserialize, Serialize};
-use toml::toml;
 use tracing::info;
 
 #[derive(Debug, Deserialize, Serialize)]
