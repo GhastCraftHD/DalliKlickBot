@@ -68,7 +68,7 @@ impl Config {
             info!("Created default config.toml, please fill in your config values. Shutting down!");
             std::process::exit(0);
         }
-        
+
         let contents = std::fs::read_to_string(path)?;
         let config: Config = toml::from_str(&contents)?;
         info!("Successfully loaded config.toml");
