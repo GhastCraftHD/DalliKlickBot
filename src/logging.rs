@@ -9,7 +9,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 
 pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     //Generate timestamped log filename
-    let timestamp = Local::now().format("dalli-klick-%Y-%m-%d:%H-%M-%S.log").to_string();
+    let timestamp = Local::now().format("dalli-klick-%Y-%m-%dT%H-%M-%S.log").to_string();
     let log_path = PathBuf::from("logs").join(timestamp);
     
     //Create logs directory if missing
@@ -54,6 +54,7 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with(file_layer)
         .init();
     
-    tracing::info!("Logger initialised");
+    info!("Initialised logger");
+    info!("Saving current log into latest.log");
     Ok(())
 }
