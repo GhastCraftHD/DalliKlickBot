@@ -25,7 +25,6 @@ pub struct SpecificationConfig {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DatabaseConfig {
     pub host: String,
-    pub port: i16,
     pub user: String,
     pub pass: String,
     pub database: String,
@@ -46,7 +45,6 @@ impl Default for Config {
             },
             database: DatabaseConfig {
                 host: "host".to_string(),
-                port: 0,
                 user: "user".to_string(),
                 pass: "passwd".to_string(),
                 database: "db".to_string(),

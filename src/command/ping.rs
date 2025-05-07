@@ -8,9 +8,9 @@ pub fn register() -> CreateCommand {
     CreateCommand::new("ping").description("Responds with pong")
 }
 
-pub async fn run(ctx: &Context, command: &CommandInteraction) {
-    info!("{} is executing command /ping", command.user.name);
-    let _ = command.create_response(&ctx.http, CreateInteractionResponse::Message(
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
+    info!("{} is executing command /ping", interaction.user.name);
+    let _ = interaction.create_response(&ctx.http, CreateInteractionResponse::Message(
         CreateInteractionResponseMessage::new().content("Pong!")
     )).await;
 }

@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::command;
 
 pub struct Handler {
-    config: Arc<Config>,
+    pub config: Arc<Config>,
 }
 
 impl Handler {
