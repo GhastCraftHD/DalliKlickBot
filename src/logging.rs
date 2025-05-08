@@ -42,7 +42,7 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with_line_number(true)
         .with_file(true)
         .with_ansi(true)
-        .with_filter(LevelFilter::DEBUG);
+        .with_filter(LevelFilter::INFO);
         
     
     let file_layer = fmt::layer()
