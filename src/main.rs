@@ -2,11 +2,7 @@ use std::sync::Arc;
 
 use crate::config::Config;
 use crate::handlers::Handler;
-use serenity::{
-    model::prelude::*,
-    Client,
-};
-use tracing::{error, info};
+use tracing::{info};
 use crate::context::Holder;
 use crate::database::init_database;
 
@@ -17,6 +13,7 @@ mod command;
 mod game;
 mod database;
 mod context;
+mod bot;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -31,17 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let handler = Handler::new(Arc::new(Holder {config, database}));
     
-    info!("Connecting DalliKlick Bot to Discord...");
-    
-    let intents = GatewayIntents::non_privileged();
-    let mut client = Client::builder(&handler.holder.config.bot.token, intents)
-        .event_handler(handler)
-        .await
-        .expect("Error while creating client");
-    
-    if let Err(why) = client.start().await {
-        error!("Client error: {:?}", why);
-    }
+    bot::init_bot(handler).await;
     
     Ok(())    
 }
