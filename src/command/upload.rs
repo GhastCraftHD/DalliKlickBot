@@ -1,5 +1,5 @@
 
-use serenity::all::{CommandInteraction, CommandOptionType, CreateInteractionResponse, CreateInteractionResponseMessage, Permissions};
+use serenity::all::{CommandInteraction, CommandOptionType, Permissions};
 use serenity::builder::{CreateCommand, CreateCommandOption};
 use serenity::client::Context;
 use tracing::info;

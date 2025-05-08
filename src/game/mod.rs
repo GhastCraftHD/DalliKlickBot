@@ -1,3 +1,4 @@
+use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,5 +23,17 @@ impl FromStr for Difficulty {
             "extreme" | "x" => Ok(Difficulty::Extreme),
             _ => Err(ParseDifficultyError),
         }
+    }
+}
+
+impl fmt::Display for Difficulty {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let difficulty_str = match self {
+            Difficulty::Easy => "Easy",
+            Difficulty::Medium => "Medium",
+            Difficulty::Hard => "Hard",
+            Difficulty::Extreme => "Extreme",
+        };
+        write!(f, "{}", difficulty_str)
     }
 }

@@ -40,7 +40,7 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with_writer(io::stdout)
         .with_target(true)
         .with_line_number(true)
-        .with_file(true)
+        .with_file(false)
         .with_ansi(true)
         .with_filter(LevelFilter::INFO);
         
@@ -49,7 +49,7 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .with_writer(move || File::options().append(true).open(&log_path).unwrap())
         .with_target(true)
         .with_line_number(true)
-        .with_file(true)
+        .with_file(false)
         .with_ansi(false)
         .with_filter(LevelFilter::DEBUG);
     

@@ -1,7 +1,7 @@
 mod ping;
 mod upload;
 
-use serenity::all::{CommandInteraction, CreateCommandOption};
+use serenity::all::CommandInteraction;
 use serenity::builder::CreateCommand;
 use serenity::client::Context;
 use serenity::model::id::GuildId;

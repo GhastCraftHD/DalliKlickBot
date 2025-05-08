@@ -7,6 +7,7 @@ use serenity::{
     Client,
 };
 use tracing::{error, info};
+use crate::context::Holder;
 use crate::database::init_database;
 
 mod logging;
@@ -23,15 +24,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     logging::init_logging()?;
     
-    let config = Arc::new(Config::load_config().expect("Could not load config"));
-    let handler = Handler::new(Arc::clone(&config));
-
-    init_database(&handler).await.expect("Could not connect to database");
+    let config = Config::load_config()
+        .expect("Could not load config");
+    let database = init_database(&config).await
+        .expect("Could not initialise database");
+    
+    let handler = Handler::new(Arc::new(Holder {config, database}));
     
     info!("Connecting DalliKlick Bot to Discord...");
     
     let intents = GatewayIntents::non_privileged();
-    let mut client = Client::builder(&config.bot.token, intents)
+    let mut client = Client::builder(&handler.holder.config.bot.token, intents)
         .event_handler(handler)
         .await
         .expect("Error while creating client");
