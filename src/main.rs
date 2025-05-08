@@ -1,19 +1,11 @@
 use std::sync::Arc;
 
-use crate::config::Config;
-use crate::handlers::Handler;
+use dalli_klick_bot::config::Config;
+use dalli_klick_bot::handlers::Handler;
 use tracing::{info};
-use crate::context::Holder;
-use crate::database::init_database;
-
-mod logging;
-mod config;
-mod handlers;
-mod command;
-mod game;
-mod database;
-mod context;
-mod bot;
+use dalli_klick_bot::context::Holder;
+use dalli_klick_bot::database::init_database;
+use dalli_klick_bot::{bot, logging};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {    

@@ -10,7 +10,7 @@ pub struct Holder {
 }
 
 impl Holder {
-    pub(crate) fn new(config: Config, database: Database) -> Self {
+    pub fn new(config: Config, database: Database) -> Self {
         Self {
             config: Arc::new(config),
             database: Arc::new(database),
