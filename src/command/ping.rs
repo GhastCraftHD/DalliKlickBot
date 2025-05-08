@@ -2,7 +2,7 @@ use serenity::all::{CommandInteraction, CreateInteractionResponse, CreateInterac
 use serenity::builder::CreateCommand;
 use serenity::client::Context;
 use tracing::info;
-use crate::context::HolderKey;
+use crate::holder::HolderKey;
 
 pub fn register() -> CreateCommand {
     info!("Registering command: /ping");

@@ -1,5 +1,5 @@
 use crate::command;
-use crate::context::{setup_context, Holder};
+use crate::holder::{setup_context, Holder};
 use serenity::all::{ActivityData, Context, EventHandler, Interaction, Ready};
 use serenity::async_trait;
 use std::sync::Arc;
