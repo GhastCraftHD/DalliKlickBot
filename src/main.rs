@@ -16,17 +16,16 @@ mod context;
 mod bot;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    info!("Starting DalliKlick Bot...");
-    
+async fn main() -> Result<(), Box<dyn std::error::Error>> {    
     logging::init_logging()?;
+    info!("Starting DalliKlick Bot...");
     
     let config = Config::load_config()
         .expect("Could not load config");
     let database = init_database(&config).await
         .expect("Could not initialise database");
     
-    let handler = Handler::new(Arc::new(Holder {config, database}));
+    let handler = Handler::new(Arc::new(Holder::new(config, database)));
     
     bot::init_bot(handler).await;
     

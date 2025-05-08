@@ -12,7 +12,7 @@ use tracing_subscriber::{fmt, Layer};
 pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     //Generate timestamped log filename
     let timestamp = Local::now().format("dalli-klick-%Y-%m-%dT%H-%M-%S.log").to_string();
-    let log_path = PathBuf::from("logs").join(timestamp);
+    let log_path = PathBuf::from("logs").join(&timestamp);
     
     //Create logs directory if missing
     std::fs::create_dir_all("logs")?;
@@ -32,7 +32,7 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         use std::os::windows::fs::symlink_file;
         if let Err(_) = symlink_file(&log_path, "logs/latest.log") {
             let _ = std::fs::copy(&log_path, "logs/latest.log");
-            info!("Could not create symlink")
+            info!("Could not create symlink for log file")
         }
     }
     
@@ -59,6 +59,6 @@ pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
         .init();
     
     info!("Initialised logger");
-    info!("Saving current log into latest.log");
+    info!("Saving current log into {}", timestamp);
     Ok(())
 }
