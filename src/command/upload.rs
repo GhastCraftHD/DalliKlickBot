@@ -1,8 +1,9 @@
 
-use serenity::all::{CommandInteraction, CommandOptionType, Permissions};
-use serenity::builder::{CreateCommand, CreateCommandOption};
+use serenity::all::{CommandInteraction, CommandOptionType, CreateInteractionResponse, CreateInteractionResponseMessage, Permissions};
+use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionResponse};
 use serenity::client::Context;
 use tracing::info;
+use crate::command::check_options;
 
 pub fn register() -> CreateCommand {
     info!("Registering command: /upload");
@@ -37,4 +38,20 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
     info!("{} is executing /upload", interaction.user.name);
     
     let _ = interaction.defer_ephemeral(&ctx.http).await;
+
+    if !check_options(
+        &interaction.data.options,
+        vec!["image", "subject", "difficulty"]
+    ) {
+        info!("Command options for /upload are invalid");
+
+        let _ = interaction.edit_response(
+            &ctx.http,
+            EditInteractionResponse::new()
+                .content("Invalid command arguments!")
+        ).await;
+    }
+
+    
+
 }

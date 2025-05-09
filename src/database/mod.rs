@@ -21,6 +21,6 @@ where
 {
     let db = connect(creds).await?;
     let result = query(&db);
-    info!("Disconneting from database...");
+    info!("Disconnecting from database...");
     Ok(result)
 }

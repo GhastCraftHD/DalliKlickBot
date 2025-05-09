@@ -1,7 +1,7 @@
 mod ping;
 mod upload;
 
-use serenity::all::CommandInteraction;
+use serenity::all::{CommandDataOption, CommandInteraction};
 use serenity::builder::CreateCommand;
 use serenity::client::Context;
 use serenity::model::id::GuildId;
@@ -25,4 +25,10 @@ pub async fn handle(ctx: &Context, command: &CommandInteraction) {
         "upload" => upload::run(ctx, command).await,
         _ => {},
     }
+}
+
+pub fn check_options(options: &Vec<CommandDataOption>, required: Vec<&str>) -> bool {
+    required.iter().all(|&option_name| {
+        options.iter().any(|opt| opt.name == option_name)
+    })
 }
