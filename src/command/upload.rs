@@ -1,16 +1,14 @@
+use serenity::all::CommandInteraction;
 use crate::command::check_options;
 use crate::game::Difficulty;
 use crate::holder::HolderKey;
-use crate::io::upload::{UploadMetaDataBuilder};
-use crate::{database};
-use serenity::all::{
-    Attachment, CommandData, CommandInteraction, CommandOptionType, Permissions,
-};
+use crate::io::upload::DatabaseMetaDataBuilder;
+use crate::database;
+use serenity::all::{Attachment, CommandData, CommandOptionType, Permissions};
 use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionResponse};
 use serenity::client::Context;
 use std::str::FromStr;
 use tracing::info;
-use crate::database::DatabaseRecord;
 
 pub struct UploadOptions {
     subject: String,
@@ -83,7 +81,7 @@ pub fn register() -> CreateCommand {
         )
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
+pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
     info!("{} is executing /upload", interaction.user.name);
 
     let _ = interaction.defer_ephemeral(&ctx.http).await;
@@ -103,7 +101,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
 
     let options = UploadOptions::from_options(&interaction.data);
 
-    let meta_data = UploadMetaDataBuilder::new()
+    let meta_data = DatabaseMetaDataBuilder::new()
         .subject(options.subject)
         .file(options.attachment)
         .await
@@ -114,18 +112,19 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
     let data = ctx.data.read().await;
 
     if let Some(holder) = data.get::<HolderKey>() {
-        let _: Option<DatabaseRecord> = database::connect(&holder.config.database).await
-            .create(("dalliklick", &meta_data.id.to_string()))
-            .content(meta_data.clone())
-            .await
-            .expect("Unexpected response from database");
+        
+        database::upload::upload_data(&holder.config.database, &meta_data).await;
 
         info!("{} uploaded Dalli Klick {}",&interaction.user.name, meta_data.id);
 
-        let _ = interaction.edit_response(
+        let _ = interaction.channel_id.say(
             &ctx.http,
-            EditInteractionResponse::new()
-                .content(format!("{} uploaded DalliKlick with subject '{}'",&interaction.user.name ,meta_data.subject))
+            format!("<@{}> uploaded a DalliKlick with the subject '{}'",&interaction.user.id ,meta_data.subject)
+        ).await;
+        
+        let _ = interaction.edit_response(
+            &ctx, 
+            EditInteractionResponse::new().content("Upload successful!")
         ).await;
 
     } else {

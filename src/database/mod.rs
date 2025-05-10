@@ -1,10 +1,11 @@
 use serde::Deserialize;
-use crate::config::{DatabaseConfig};
+use crate::config::DatabaseConfig;
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::Root;
 use surrealdb::{RecordId, Surreal};
 use tracing::info;
 
+pub mod upload;
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseRecord {

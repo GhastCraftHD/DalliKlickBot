@@ -1,28 +1,20 @@
 use crate::game::Difficulty;
 use crate::io;
 use image::{ImageFormat, ImageReader};
-use serde::{Deserialize, Serialize};
 use serenity::all::Attachment;
 use std::path::PathBuf;
 use surrealdb::Uuid;
+use tracing::info;
+use crate::database::upload::DatabaseMetaData;
 
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone)]
-pub struct UploadMetaData {
-    pub id: String,
-    pub subject: String,
-    pub path: PathBuf,
-    pub difficulty: Difficulty,
-}
-
-pub struct UploadMetaDataBuilder {
+pub struct DatabaseMetaDataBuilder {
     id: Option<String>,
     subject: Option<String>,
     path: Option<PathBuf>,
     difficulty: Option<Difficulty>,
 }
 
-impl UploadMetaDataBuilder {
+impl DatabaseMetaDataBuilder {
     pub fn new() -> Self {
         Self {
             id: None,
@@ -42,9 +34,11 @@ impl UploadMetaDataBuilder {
         attachment: Attachment,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let uuid = Uuid::new_v4().to_string();
+        info!("Creating new Dalli Klick under UUID {}", &uuid);
         let image_dir = io::get_image_dir().await;
         let file_path = image_dir.join(format!("{}.png", uuid));
 
+        info!("Downloading attached image from {}", &attachment.url);
         let response = reqwest::get(&attachment.url).await?;
         let content = response.bytes().await?;
 
@@ -53,6 +47,10 @@ impl UploadMetaDataBuilder {
             .decode()?;
 
         image.save_with_format(&file_path, ImageFormat::Png)?;
+        info!(
+            "Saved attached image under {}", 
+            &file_path.to_str().expect("Error while decoding file path")
+        );
         self.path = Some(file_path);
         self.id = Some(uuid);
         Ok(self)
@@ -63,8 +61,9 @@ impl UploadMetaDataBuilder {
         self
     }
 
-    pub fn build(self) -> UploadMetaData {
-        UploadMetaData {
+    pub fn build(self) -> DatabaseMetaData {
+        info!("Building upload meta data");
+        DatabaseMetaData {
             id: self.id.expect("The ID of this Dalli Klick"),
             subject: self.subject.expect("The subject of this Dalli Klick"),
             path: self.path.expect("The file path of the locally stored image"),

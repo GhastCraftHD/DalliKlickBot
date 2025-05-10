@@ -1,0 +1,23 @@
+use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
+use crate::config::DatabaseConfig;
+use crate::database;
+use crate::database::DatabaseRecord;
+use crate::game::Difficulty;
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+pub struct DatabaseMetaData {
+    pub id: String,
+    pub subject: String,
+    pub path: PathBuf,
+    pub difficulty: Difficulty,
+}
+
+pub async fn upload_data(config: &DatabaseConfig, meta_data: &DatabaseMetaData) {
+    let _: Option<DatabaseRecord> = database::connect(config).await
+        .create(("dalliklick", &meta_data.id.to_string()))
+        .content(meta_data.clone())
+        .await
+        .expect("Unexpected response from database");
+}
