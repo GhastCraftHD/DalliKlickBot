@@ -1,14 +1,17 @@
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 use crate::config::DatabaseConfig;
 use crate::database;
 use crate::database::DatabaseRecord;
 use crate::game::Difficulty;
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+use surrealdb::sql;
+
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone)]
 pub struct DatabaseMetaData {
     pub id: String,
+    pub created_at: sql::Datetime,
     pub subject: String,
     pub path: PathBuf,
     pub difficulty: Difficulty,

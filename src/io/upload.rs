@@ -3,12 +3,14 @@ use crate::io;
 use image::{ImageFormat, ImageReader};
 use serenity::all::Attachment;
 use std::path::PathBuf;
-use surrealdb::Uuid;
+use surrealdb::{Uuid};
+use surrealdb::sql::Datetime;
 use tracing::info;
 use crate::database::upload::DatabaseMetaData;
 
 pub struct DatabaseMetaDataBuilder {
     id: Option<String>,
+    created_at: Datetime,
     subject: Option<String>,
     path: Option<PathBuf>,
     difficulty: Option<Difficulty>,
@@ -18,6 +20,7 @@ impl DatabaseMetaDataBuilder {
     pub fn new() -> Self {
         Self {
             id: None,
+            created_at: Datetime::default(),
             subject: None,
             path: None,
             difficulty: None,
@@ -65,6 +68,7 @@ impl DatabaseMetaDataBuilder {
         info!("Building upload meta data");
         DatabaseMetaData {
             id: self.id.expect("The ID of this Dalli Klick"),
+            created_at: self.created_at,
             subject: self.subject.expect("The subject of this Dalli Klick"),
             path: self.path.expect("The file path of the locally stored image"),
             difficulty: self.difficulty.expect("The difficulty of the Dalli Klick"),
