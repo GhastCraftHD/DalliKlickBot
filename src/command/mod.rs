@@ -1,5 +1,6 @@
 mod ping;
 mod upload;
+mod create;
 
 use serenity::all::{CommandDataOption, CommandInteraction};
 use serenity::builder::CreateCommand;
@@ -16,6 +17,7 @@ fn get_commands() -> Vec<CreateCommand> {
     vec![
         ping::register(),
         upload::register(),
+        create::register(),
     ]
 }
 
@@ -23,11 +25,12 @@ pub async fn handle(ctx: &Context, command: &CommandInteraction) {
     match command.data.name.as_str() {
         "ping" => ping::run(ctx, command).await,
         "upload" => upload::run(ctx, command).await,
+        "create" => create::run(ctx, command).await,
         _ => {},
     }
 }
 
-pub fn check_options(options: &Vec<CommandDataOption>, required: Vec<&str>) -> bool {
+pub fn require_options(options: &Vec<CommandDataOption>, required: Vec<&str>) -> bool {
     required.iter().all(|&option_name| {
         options.iter().any(|opt| opt.name == option_name)
     })

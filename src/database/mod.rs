@@ -6,6 +6,7 @@ use surrealdb::{RecordId, Surreal};
 use tracing::info;
 
 pub mod upload;
+mod create;
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseRecord {

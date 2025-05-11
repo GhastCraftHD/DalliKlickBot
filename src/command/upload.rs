@@ -1,5 +1,5 @@
 use serenity::all::CommandInteraction;
-use crate::command::check_options;
+use crate::command::require_options;
 use crate::game::Difficulty;
 use crate::holder::HolderKey;
 use crate::io::upload::DatabaseMetaDataBuilder;
@@ -86,7 +86,7 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
 
     let _ = interaction.defer_ephemeral(&ctx.http).await;
 
-    if !check_options(
+    if !require_options(
         &interaction.data.options,
         vec!["image", "subject", "difficulty"],
     ) {
@@ -97,6 +97,8 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
                 &ctx.http,
                 EditInteractionResponse::new().content("Invalid command arguments!"),
             ).await;
+        
+        return;
     }
 
     let options = UploadOptions::from_options(&interaction.data);

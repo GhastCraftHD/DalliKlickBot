@@ -1,6 +1,7 @@
 use std::fmt;
 use std::str::FromStr;
 use serde::{Deserialize, Serialize};
+use crate::database::upload::DatabaseMetaData;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Difficulty {
@@ -8,6 +9,12 @@ pub enum Difficulty {
     Medium,
     Hard,
     Extreme,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Challenge {
+    pub prize: String,
+    pub dalli_klick: DatabaseMetaData,
 }
 
 #[derive(Debug)]
