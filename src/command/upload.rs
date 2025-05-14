@@ -1,14 +1,21 @@
-use serenity::all::CommandInteraction;
-use crate::command::require_options;
+use crate::command::{require_options, CommandError};
+use crate::database;
+use crate::error::AppError;
+use crate::error::AppError::{Command, Io, SharedDataAccessError};
 use crate::game::Difficulty;
 use crate::holder::HolderKey;
 use crate::io::upload::DatabaseMetaDataBuilder;
-use crate::database;
+use crate::io::upload::UploadIoError;
+use crate::io::IoError;
+use serenity::all::CommandInteraction;
+use serenity::all::Scope::ApplicationsEntitlements;
 use serenity::all::{Attachment, CommandData, CommandOptionType, Permissions};
 use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionResponse};
 use serenity::client::Context;
 use std::str::FromStr;
-use tracing::info;
+use tracing::{error, info};
+use tracing_subscriber::fmt::format;
+use crate::io::IoError::Upload;
 
 pub struct UploadOptions {
     subject: String,
@@ -86,19 +93,23 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
 
     let _ = interaction.defer_ephemeral(&ctx.http).await;
 
+    let result = process_upload(ctx, interaction).await;
+    
+    if let Err(e) = result {
+        error!("Error during /upload: {}", e);
+        let _ = interaction.edit_response(
+            &ctx.http,
+            EditInteractionResponse::new().content(format!("Upload failed: {}", e))
+        ).await;
+    }
+}
+
+async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Result<(), AppError> {
     if !require_options(
         &interaction.data.options,
         vec!["image", "subject", "difficulty"],
     ) {
-        info!("Command options for /upload are invalid");
-
-        let _ = interaction
-            .edit_response(
-                &ctx.http,
-                EditInteractionResponse::new().content("Invalid command arguments!"),
-            ).await;
-        
-        return;
+        return Err(Command(CommandError::InvalidCommandOptions));
     }
 
     let options = UploadOptions::from_options(&interaction.data);
@@ -106,34 +117,34 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
     let meta_data = DatabaseMetaDataBuilder::new()
         .subject(options.subject)
         .file(options.attachment)
-        .await
-        .expect("Image file to be downloaded and stored")
+        .await.map_err(|e| Io(Upload(e)))?
         .difficulty(options.difficulty)
-        .build();
+        .build().map_err(|e| Io(Upload(e)))?;
 
     let data = ctx.data.read().await;
+    let holder = data.get::<HolderKey>().ok_or(SharedDataAccessError)?;
 
-    if let Some(holder) = data.get::<HolderKey>() {
-        
-        database::upload::upload_data(&holder.config.database, &meta_data).await;
-
-        info!("{} uploaded Dalli Klick {}",&interaction.user.name, meta_data.id);
-
-        let _ = interaction.channel_id.say(
-            &ctx.http,
-            format!("<@{}> uploaded a DalliKlick with the subject '{}'",&interaction.user.id ,meta_data.subject)
-        ).await;
-        
-        let _ = interaction.edit_response(
-            &ctx, 
-            EditInteractionResponse::new().content("Upload successful!")
-        ).await;
-
-    } else {
-        let _ = interaction.edit_response(
-            &ctx.http,
-            EditInteractionResponse::new().content("Error while accessing database credentials")
-        ).await;
-
-    }
+    database::upload::upload_data(&holder.config.database, &meta_data).await;
+    
+    info!(
+        "{} uploaded Dalli Klick {}",
+        &interaction.user.name,
+        meta_data.id
+    );
+    
+    interaction.channel_id.say(
+        &ctx.http,
+        format!(
+            "<@{}> uploaded a DalliKlick with the subject '{}'",
+            &interaction.user.id, 
+            meta_data.subject
+        )
+    ).await.map_err(|e| AppError::Other(format!("Failed to send message: {}", e)))?;
+    
+    interaction.edit_response(
+        &ctx.http,
+        EditInteractionResponse::new().content("Upload successful!")
+    ).await.map_err(|e| AppError::Other(format!("Failed to edit response: {}", e)))?;
+    
+    Ok(())
 }

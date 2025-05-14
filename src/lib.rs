@@ -7,3 +7,4 @@ pub mod database;
 pub mod holder;
 pub mod bot;
 pub mod io;
+mod error;

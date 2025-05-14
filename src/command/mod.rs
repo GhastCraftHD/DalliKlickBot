@@ -6,6 +6,13 @@ use serenity::all::{CommandDataOption, CommandInteraction};
 use serenity::builder::CreateCommand;
 use serenity::client::Context;
 use serenity::model::id::GuildId;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum CommandError {
+    #[error("Missing or invalid command arguments")]
+    InvalidCommandOptions,
+}
 
 pub async fn register(ctx: &Context, guild_id: u64) {
     let guild = GuildId::new(guild_id);
