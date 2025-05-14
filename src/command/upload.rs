@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use crate::command::{require_options, CommandError};
 use crate::database;
 use crate::error::AppError;
@@ -12,11 +13,63 @@ use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionRespo
 use serenity::client::Context;
 use std::str::FromStr;
 use tracing::{error, info};
+use crate::config::DatabaseConfig;
+use crate::database::DatabaseRecord;
 
 pub struct UploadOptions {
     subject: String,
     attachment: Attachment,
     difficulty: Difficulty,
+}
+
+struct UploadGuard {
+    file_path: Option<PathBuf>,
+    db_id: Option<DatabaseRecord>,
+    db_config: Option<DatabaseConfig>,
+    completed: bool,
+}
+
+impl UploadGuard {
+    fn new() -> Self {
+        Self {
+            file_path: None,
+            db_id: None,
+            db_config: None,
+            completed: false,
+        }
+    }
+
+    fn mark_completed(mut self) {
+        self.completed = true;
+    }
+}
+
+impl Drop for UploadGuard {
+    fn drop(&mut self) {
+        if !self.completed {
+            let file_path = self.file_path.clone();
+            let db_id = self.db_id.clone();
+            let db_config = self.db_config.clone();
+
+            tokio::spawn(async move {
+                if let Some(path) = file_path {
+                    info!(
+                        "Removing downloaded image {:?} since upload couldn't be completed", 
+                        path.to_str()
+                    );
+                    let _ = tokio::fs::remove_file(path).await;
+                }
+                if let (Some(id), Some(config)) = (db_id, db_config) {
+                    info!(
+                        "Removing database record {} since upload couldn't be completed",
+                        id.id
+                    );
+                    //TODO: implement database delete function
+                    todo!("database delete function not implemented")
+                }
+            });
+        }
+    }
 }
 
 impl UploadOptions {
@@ -101,6 +154,8 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
 }
 
 async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Result<(), AppError> {
+    let mut guard = UploadGuard::new();
+
     if !require_options(
         &interaction.data.options,
         vec!["image", "subject", "difficulty"],
@@ -117,10 +172,13 @@ async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Resu
         .difficulty(options.difficulty)
         .build().map_err(|e| Io(Upload(e)))?;
 
+    guard.file_path = Some(meta_data.path.clone());
+
     let data = ctx.data.read().await;
     let holder = data.get::<HolderKey>().ok_or(SharedDataAccessError)?;
-
-    database::upload::upload_data(&holder.config.database, &meta_data).await?;
+    
+    guard.db_config = Some(holder.config.database.clone());
+    guard.db_id = database::upload::upload_data(&holder.config.database, &meta_data).await?;
     
     info!(
         "{} uploaded Dalli Klick {}",
@@ -142,5 +200,6 @@ async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Resu
         EditInteractionResponse::new().content("Upload successful!")
     ).await.map_err(|e| AppError::Other(format!("Failed to edit response: {}", e)))?;
     
+    guard.mark_completed();
     Ok(())
 }

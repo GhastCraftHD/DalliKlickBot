@@ -41,7 +41,7 @@ pub struct SpecificationConfig {
 
 /// The database configuration
 /// This configuration includes information, such as database credentials
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DatabaseConfig {
     /// The host under which the database can be found
     pub host: String,

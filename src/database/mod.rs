@@ -15,9 +15,9 @@ pub enum DatabaseError {
     SurrealError(#[from] surrealdb::Error)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct DatabaseRecord {
-    id: RecordId,
+    pub id: RecordId,
 }
 
 pub async fn connect(creds: &DatabaseConfig) -> Result<Surreal<Client>, DatabaseError> {

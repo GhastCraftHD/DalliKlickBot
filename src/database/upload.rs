@@ -20,11 +20,9 @@ pub struct DatabaseMetaData {
 pub async fn upload_data(
     config: &DatabaseConfig, 
     meta_data: &DatabaseMetaData
-) -> Result<(), DatabaseError> {
-    let _: Option<DatabaseRecord> = database::connect(config).await?
+) -> Result<Option<DatabaseRecord>, DatabaseError> {
+    Ok(database::connect(config).await?
         .create(("dalliklick", &meta_data.id.to_string()))
         .content(meta_data.clone())
-        .await?;
-    
-    Ok(())
+        .await?)
 }
