@@ -5,17 +5,13 @@ use crate::error::AppError::{Command, Io, SharedDataAccessError};
 use crate::game::Difficulty;
 use crate::holder::HolderKey;
 use crate::io::upload::DatabaseMetaDataBuilder;
-use crate::io::upload::UploadIoError;
-use crate::io::IoError;
+use crate::io::IoError::Upload;
 use serenity::all::CommandInteraction;
-use serenity::all::Scope::ApplicationsEntitlements;
 use serenity::all::{Attachment, CommandData, CommandOptionType, Permissions};
 use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionResponse};
 use serenity::client::Context;
 use std::str::FromStr;
 use tracing::{error, info};
-use tracing_subscriber::fmt::format;
-use crate::io::IoError::Upload;
 
 pub struct UploadOptions {
     subject: String,
@@ -124,7 +120,7 @@ async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Resu
     let data = ctx.data.read().await;
     let holder = data.get::<HolderKey>().ok_or(SharedDataAccessError)?;
 
-    database::upload::upload_data(&holder.config.database, &meta_data).await;
+    database::upload::upload_data(&holder.config.database, &meta_data).await?;
     
     info!(
         "{} uploaded Dalli Klick {}",

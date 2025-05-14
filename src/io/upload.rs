@@ -73,7 +73,7 @@ impl DatabaseMetaDataBuilder {
         let image_dir = io::get_image_dir().await;
         let file_path = image_dir.join(format!("{}.png", uuid));
 
-        info!("Downloading attached image from {}", &attachment.url);
+        info!("Downloading attached file from {}", &attachment.url);
         let response = reqwest::get(&attachment.url).await?;
 
         let content_type = response
@@ -95,7 +95,7 @@ impl DatabaseMetaDataBuilder {
 
         image.save_with_format(&file_path, ImageFormat::Png)?;
         info!(
-            "Saved attached image under {}", 
+            "Saved attached image under {}",
             &file_path.to_str().expect("Error while decoding file path")
         );
         self.path = Some(file_path);

@@ -7,6 +7,9 @@ pub enum AppError {
 
     #[error(transparent)]
     Command(#[from] crate::command::CommandError),
+    
+    #[error(transparent)]
+    Database(#[from] crate::database::DatabaseError),
 
     #[error("Failed to access shared application data")]
     SharedDataAccessError,
