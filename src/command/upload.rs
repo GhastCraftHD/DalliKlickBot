@@ -2,7 +2,7 @@ use crate::command::{require_options, CommandError};
 use crate::database;
 use crate::error::AppError;
 use crate::error::AppError::{Command, Io, SharedDataAccessError};
-use crate::game::Difficulty;
+use crate::game::{Difficulty, GameError};
 use crate::holder::HolderKey;
 use crate::io::upload::DatabaseMetaDataBuilder;
 use crate::io::IoError::Upload;
@@ -20,7 +20,7 @@ pub struct UploadOptions {
 }
 
 impl UploadOptions {
-    pub fn from_options(data: &CommandData) -> Self {
+    pub fn from_options(data: &CommandData) -> Result<Self, GameError> {
         let mut subject = None;
         let mut attachment = None;
         let mut difficulty = None;
@@ -40,7 +40,7 @@ impl UploadOptions {
                 "difficulty" => {
                     if let Some(value) = option.value.as_str() {
                         difficulty = Some(
-                            Difficulty::from_str(value).expect("The difficulty of the Dalli Klick"),
+                            Difficulty::from_str(value)?,
                         );
                     }
                 }
@@ -48,11 +48,11 @@ impl UploadOptions {
             }
         }
 
-        Self {
+        Ok(Self {
             subject: subject.expect("The subject of the Dalli Klick"),
             attachment: attachment.expect("The image attached to the Dalli Klick"),
             difficulty: difficulty.expect("The difficulty of the Dalli Klick"),
-        }
+        })
     }
 }
 
@@ -108,7 +108,7 @@ async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Resu
         return Err(Command(CommandError::InvalidCommandOptions));
     }
 
-    let options = UploadOptions::from_options(&interaction.data);
+    let options = UploadOptions::from_options(&interaction.data)?;
 
     let meta_data = DatabaseMetaDataBuilder::new()
         .subject(options.subject)

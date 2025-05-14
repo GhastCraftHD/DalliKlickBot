@@ -10,6 +10,9 @@ pub enum AppError {
     
     #[error(transparent)]
     Database(#[from] crate::database::DatabaseError),
+    
+    #[error(transparent)]
+    Game(#[from] crate::game::GameError),
 
     #[error("Failed to access shared application data")]
     SharedDataAccessError,

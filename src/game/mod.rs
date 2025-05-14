@@ -1,6 +1,7 @@
 use std::fmt;
 use std::str::FromStr;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 use crate::database::upload::DatabaseMetaData;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -17,11 +18,14 @@ pub struct Challenge {
     pub dalli_klick: DatabaseMetaData,
 }
 
-#[derive(Debug)]
-pub struct ParseDifficultyError;
+#[derive(Debug, Error)]
+pub enum GameError {
+    #[error("Failed to parse difficulty '{0}'")]
+    ParseDifficultyError(String),
+}
 
 impl FromStr for Difficulty {
-    type Err = ParseDifficultyError;
+    type Err = GameError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() { 
@@ -29,7 +33,7 @@ impl FromStr for Difficulty {
             "medium" | "m" => Ok(Difficulty::Medium),
             "hard" | "h" => Ok(Difficulty::Hard),
             "extreme" | "x" => Ok(Difficulty::Extreme),
-            _ => Err(ParseDifficultyError),
+            _ => Err(GameError::ParseDifficultyError(s.to_string())),
         }
     }
 }
