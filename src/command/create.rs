@@ -1,7 +1,12 @@
-use serenity::all::{CommandInteraction, CommandOptionType, Context, CreateCommandOption, EditInteractionResponse, Permissions};
+use crate::command::{CommandError, require_options};
+use crate::error::AppError;
+use crate::error::AppError::Command;
+use serenity::all::{
+    CommandInteraction, CommandOptionType, Context, CreateCommandOption, EditInteractionResponse,
+    Permissions,
+};
 use serenity::builder::CreateCommand;
-use tracing::info;
-use crate::command::require_options;
+use tracing::{info};
 
 pub fn register() -> CreateCommand {
     info!("Registering command: /create");
@@ -11,33 +16,23 @@ pub fn register() -> CreateCommand {
         .add_option(CreateCommandOption::new(
             CommandOptionType::String,
             "prize",
-            "The prize that is being fought for"
+            "The prize that is being fought for",
         ))
         .add_option(CreateCommandOption::new(
             CommandOptionType::Boolean,
             "start",
-            "Start the challenge immediately"
+            "Start the challenge immediately",
         ))
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), AppError> {
     info!("{} is executing /create", interaction.user.name);
-    
-    if !require_options(
-        &interaction.data.options,
-        vec!["prize"]
-    ) {
-        info!("Command options for /upload are invalid");
 
-        let _ = interaction
-            .edit_response(
-                &ctx.http,
-                EditInteractionResponse::new().content("Invalid command arguments!"),
-            ).await;
+    interaction.defer_ephemeral(&ctx.http).await?;
 
-        return;
+    if !require_options(&interaction.data.options, vec!["prize"]) {
+        return Err(Command(CommandError::InvalidCommandOptions));
     }
-    
-    
-    
+
+    Ok(())
 }

@@ -1,6 +1,8 @@
 use crate::config::Config;
 use serenity::prelude::{Context, TypeMapKey};
 use std::sync::Arc;
+use crate::error::AppError;
+use crate::error::AppError::SharedDataAccessError;
 use crate::game::Challenge;
 
 #[derive(Debug)]
@@ -26,4 +28,11 @@ impl TypeMapKey for HolderKey {
 pub async fn setup_context(ctx: &Context, holder: Arc<Holder>) {
     let mut data = ctx.data.write().await;
     data.insert::<HolderKey>(holder);
+}
+
+pub async fn retrieve_holder(ctx: &Context) -> Result<Arc<Holder>, AppError> {
+    let data = ctx.data.read().await;
+    data.get::<HolderKey>()
+        .cloned()
+        .ok_or(SharedDataAccessError)
 }

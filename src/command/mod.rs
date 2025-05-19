@@ -3,10 +3,11 @@ mod upload;
 mod create;
 
 use serenity::all::{CommandDataOption, CommandInteraction};
-use serenity::builder::CreateCommand;
+use serenity::builder::{CreateCommand, EditInteractionResponse};
 use serenity::client::Context;
 use serenity::model::id::GuildId;
 use thiserror::Error;
+use tracing::error;
 
 #[derive(Debug, Error)]
 pub enum CommandError {
@@ -29,11 +30,18 @@ fn get_commands() -> Vec<CreateCommand> {
 }
 
 pub async fn handle(ctx: &Context, command: &CommandInteraction) {
-    match command.data.name.as_str() {
-        "ping" => ping::run(ctx, command).await,
+    let result = match command.data.name.as_str() {
         "upload" => upload::run(ctx, command).await,
         "create" => create::run(ctx, command).await,
-        _ => {},
+        _ => Ok(()),
+    };
+
+    if let Err(e) = result {
+        error!("Error during /upload: {}", e);
+        let _ = command.edit_response(
+            &ctx.http,
+            EditInteractionResponse::new().content(format!("Upload failed: {}", e))
+        ).await;
     }
 }
 

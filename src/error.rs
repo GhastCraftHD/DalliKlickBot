@@ -13,6 +13,9 @@ pub enum AppError {
     
     #[error(transparent)]
     Game(#[from] crate::game::GameError),
+    
+    #[error(transparent)]
+    Serenity(#[from] serenity::Error),
 
     #[error("Failed to access shared application data")]
     SharedDataAccessError,

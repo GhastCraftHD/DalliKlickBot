@@ -12,7 +12,10 @@ mod create;
 #[derive(Debug, Error)]
 pub enum DatabaseError {
     #[error("Database error: {0}")]
-    SurrealError(#[from] surrealdb::Error)
+    SurrealError(#[from] surrealdb::Error),
+    
+    #[error("Could not find any records")]
+    NoSuchRecordError,
 }
 
 #[derive(Debug, Deserialize, Clone)]

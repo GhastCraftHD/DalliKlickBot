@@ -1,10 +1,9 @@
 use std::path::PathBuf;
 use crate::command::{require_options, CommandError};
-use crate::database;
+use crate::{database, holder};
 use crate::error::AppError;
-use crate::error::AppError::{Command, Io, SharedDataAccessError};
+use crate::error::AppError::{Command, Io};
 use crate::game::{Difficulty, GameError};
-use crate::holder::HolderKey;
 use crate::io::upload::DatabaseMetaDataBuilder;
 use crate::io::IoError::Upload;
 use serenity::all::CommandInteraction;
@@ -12,7 +11,7 @@ use serenity::all::{Attachment, CommandData, CommandOptionType, Permissions};
 use serenity::builder::{CreateCommand, CreateCommandOption, EditInteractionResponse};
 use serenity::client::Context;
 use std::str::FromStr;
-use tracing::{error, info};
+use tracing::{info};
 use crate::config::DatabaseConfig;
 use crate::database::DatabaseRecord;
 
@@ -137,24 +136,12 @@ pub fn register() -> CreateCommand {
         )
 }
 
-pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) {
+pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), AppError> {
     info!("{} is executing /upload", interaction.user.name);
 
-    let _ = interaction.defer_ephemeral(&ctx.http).await;
-
-    let result = process_upload(ctx, interaction).await;
-    
-    if let Err(e) = result {
-        error!("Error during /upload: {}", e);
-        let _ = interaction.edit_response(
-            &ctx.http,
-            EditInteractionResponse::new().content(format!("Upload failed: {}", e))
-        ).await;
-    }
-}
-
-async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Result<(), AppError> {
     let mut guard = UploadGuard::new();
+
+    interaction.defer_ephemeral(&ctx.http).await?;
 
     if !require_options(
         &interaction.data.options,
@@ -171,35 +158,34 @@ async fn process_upload(ctx: &Context, interaction: &CommandInteraction) -> Resu
         .await.map_err(|e| Io(Upload(e)))?
         .difficulty(options.difficulty)
         .build().map_err(|e| Io(Upload(e)))?;
-
+                  
     guard.file_path = Some(meta_data.path.clone());
+            
+    let holder = holder::retrieve_holder(ctx).await?;
 
-    let data = ctx.data.read().await;
-    let holder = data.get::<HolderKey>().ok_or(SharedDataAccessError)?;
-    
     guard.db_config = Some(holder.config.database.clone());
     guard.db_id = database::upload::upload_data(&holder.config.database, &meta_data).await?;
-    
+
     info!(
         "{} uploaded Dalli Klick {}",
         &interaction.user.name,
         meta_data.id
     );
-    
+
     interaction.channel_id.say(
         &ctx.http,
         format!(
             "<@{}> uploaded a DalliKlick with the subject '{}'",
-            &interaction.user.id, 
+            &interaction.user.id,
             meta_data.subject
         )
     ).await.map_err(|e| AppError::Other(format!("Failed to send message: {}", e)))?;
-    
+
     interaction.edit_response(
         &ctx.http,
         EditInteractionResponse::new().content("Upload successful!")
     ).await.map_err(|e| AppError::Other(format!("Failed to edit response: {}", e)))?;
-    
+
     guard.mark_completed();
     Ok(())
 }
