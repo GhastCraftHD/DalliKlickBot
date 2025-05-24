@@ -15,12 +15,18 @@ use tracing::{info};
 use crate::config::DatabaseConfig;
 use crate::database::DatabaseRecord;
 
+/// command options of the upload command
 pub struct UploadOptions {
+    /// the word to be guessed from the image
     subject: String,
+    /// the image from which the word should be guessed
     attachment: Attachment,
     difficulty: Difficulty,
 }
 
+/// Struct which saves the path of the uploaded image as well as the database ID
+/// This struct is used so when anything goes wrong during the upload process, those pieces of
+/// data can still be accessed for cleanup
 struct UploadGuard {
     file_path: Option<PathBuf>,
     db_id: Option<DatabaseRecord>,
@@ -142,7 +148,7 @@ pub(crate) async fn run(ctx: &Context, interaction: &CommandInteraction) -> Resu
     let mut guard = UploadGuard::new();
 
     interaction.defer_ephemeral(&ctx.http).await?;
-
+    
     if !require_options(
         &interaction.data.options,
         vec!["image", "subject", "difficulty"],
