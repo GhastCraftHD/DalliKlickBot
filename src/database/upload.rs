@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use surrealdb::sql;
 
-
 #[derive(Serialize, Deserialize)]
 #[derive(Debug, Clone)]
 pub struct DatabaseMetaData {

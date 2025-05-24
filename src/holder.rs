@@ -8,14 +8,14 @@ use crate::game::Challenge;
 #[derive(Debug)]
 pub struct Holder {
     pub config: Arc<Config>,
-    pub challenge: Option<Challenge>
+    pub challenge: Arc<Option<Challenge>>
 }
 
 impl Holder {
     pub fn new(config: Config) -> Self {
         Self {
             config: Arc::new(config),
-            challenge: None,
+            challenge: Arc::new(None),
         }
     }
 }

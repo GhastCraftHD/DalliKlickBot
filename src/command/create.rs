@@ -2,7 +2,7 @@ use crate::command::{CommandError, require_options};
 use crate::error::AppError;
 use crate::error::AppError::Command;
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommandOption, EditInteractionResponse,
+    CommandInteraction, CommandOptionType, Context, CreateCommandOption,
     Permissions,
 };
 use serenity::builder::CreateCommand;
