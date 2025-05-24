@@ -4,15 +4,26 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# time related stuff
 chrono = "0.4.41"
+# (de-)serialization
 serde = { version = "1.0.219", features = ["derive"] }
+# rust Discord API
 serenity = { version = "0.12.4", features = ["full", "gateway", "model", "rustls_backend"] }
+# working with surreal DB
 surrealdb = { version = "2.3.1", features = ["http", "kv-rocksdb"] }
+# async
 tokio = { version = "1.44.2", features = ["full", "rt-multi-thread", "macros"] }
+# TOML serialization
 toml = "0.8.22"
+# logging
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
+# HTTP requests
 reqwest = "0.12.15"
+# PC directory related stuff
 dirs = "6.0.0"
+# image manipulation + en-/decoding
 image = "0.25.6"
+# convenient error macros
 thiserror = "2.0.12"
