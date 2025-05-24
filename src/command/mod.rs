@@ -45,6 +45,30 @@ pub async fn handle(ctx: &Context, command: &CommandInteraction) {
     }
 }
 
+/// Function which checks if all `options` given by `required` are present in a command
+/// this function should be used for guard statements which return an error if the required 
+/// [`CommandOption`]'s are not present 
+/// 
+/// * `options`  - [`CommandDataOption`]'s to be checked
+/// * `required` - expected options in string form
+/// 
+/// # Example
+/// The example expects the command to have a `user` 
+/// and a `reward` to give to said user. <br>
+/// If one of those options is missing, the remaining command cannot work,
+/// so it returns an Err
+/// 
+/// ```
+/// // any custom command
+/// fn example(interaction: &CommandInteraction) -> Result<(), AppError> {
+///
+///     if !require_options(&interaction.data.options, vec!["user", "reward"]) {
+///         return Err(Command(CommandError::InvalidCommandOptions));
+///     }
+///     // ...
+///     Ok(())
+/// }
+/// ```
 pub fn require_options(options: &Vec<CommandDataOption>, required: Vec<&str>) -> bool {
     required.iter().all(|&option_name| {
         options.iter().any(|opt| opt.name == option_name)
